@@ -216,7 +216,7 @@ Application: &ApplicationDefaults
 Orderer: &OrdererDefaults
 
     # Orderer Type: The orderer implementation to start
-    OrdererType: etcdraft
+    OrdererType: solo
     
     # Addresses used to be the list of orderer addresses that clients and peers
     # could connect to.  However, this does not allow clients to associate orderer
@@ -315,6 +315,18 @@ Channel: &ChannelDefaults
 #
 ################################################################################
 Profiles:
+    SingleOrgOrdererGenesis:
+        <<: *ChannelDefaults
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *OrdererOrg
+            Capabilities:
+                <<: *OrdererCapabilities
+        Consortiums:
+            SampleConsortium:
+                Organizations:
+                    - *Org1
 
     TwoOrgsOrdererGenesis:
         <<: *ChannelDefaults
@@ -337,5 +349,15 @@ Profiles:
             Organizations:
                 - *Org1
                 - *Org2
+            Capabilities:
+                <<: *ApplicationCapabilities
+
+    SingleOrgChannel:
+        Consortium: SampleConsortium
+        <<: *ChannelDefaults
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Org1
             Capabilities:
                 <<: *ApplicationCapabilities

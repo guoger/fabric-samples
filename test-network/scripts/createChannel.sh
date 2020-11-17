@@ -21,7 +21,7 @@ fi
 createChannelTx() {
 
 	set -x
-	configtxgen -profile TwoOrgsChannel -outputCreateChannelTx ./channel-artifacts/${CHANNEL_NAME}.tx -channelID $CHANNEL_NAME
+	configtxgen -profile SingleOrgChannel -outputCreateChannelTx ./channel-artifacts/${CHANNEL_NAME}.tx -channelID $CHANNEL_NAME
 	res=$?
 	{ set +x; } 2>/dev/null
 	if [ $res -ne 0 ]; then
@@ -36,7 +36,7 @@ createAncorPeerTx() {
 
 	infoln "Generating anchor peer update transaction for ${orgmsp}"
 	set -x
-	configtxgen -profile TwoOrgsChannel -outputAnchorPeersUpdate ./channel-artifacts/${orgmsp}anchors.tx -channelID $CHANNEL_NAME -asOrg ${orgmsp}
+	configtxgen -profile SingleOrgChannel -outputAnchorPeersUpdate ./channel-artifacts/${orgmsp}anchors.tx -channelID $CHANNEL_NAME -asOrg ${orgmsp}
 	res=$?
 	{ set +x; } 2>/dev/null
 	if [ $res -ne 0 ]; then
@@ -53,7 +53,7 @@ createChannel() {
 	while [ $rc -ne 0 -a $COUNTER -lt $MAX_RETRY ] ; do
 		sleep $DELAY
 		set -x
-		peer channel create -o localhost:7050 -c $CHANNEL_NAME --ordererTLSHostnameOverride orderer.example.com -f ./channel-artifacts/${CHANNEL_NAME}.tx --outputBlock ./channel-artifacts/${CHANNEL_NAME}.block --tls --cafile $ORDERER_CA >&log.txt
+		peer channel create -o localhost:7050 -c $CHANNEL_NAME --ordererTLSHostnameOverride orderer.example.com -f ./channel-artifacts/${CHANNEL_NAME}.tx --outputBlock ./channel-artifacts/${CHANNEL_NAME}.block --cafile $ORDERER_CA >&log.txt
 		res=$?
 		{ set +x; } 2>/dev/null
 		let rc=$res
@@ -93,7 +93,7 @@ updateAnchorPeers() {
 	while [ $rc -ne 0 -a $COUNTER -lt $MAX_RETRY ] ; do
     sleep $DELAY
     set -x
-		peer channel update -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com -c $CHANNEL_NAME -f ./channel-artifacts/${CORE_PEER_LOCALMSPID}anchors.tx --tls --cafile $ORDERER_CA >&log.txt
+		peer channel update -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com -c $CHANNEL_NAME -f ./channel-artifacts/${CORE_PEER_LOCALMSPID}anchors.tx --cafile $ORDERER_CA >&log.txt
     res=$?
     { set +x; } 2>/dev/null
 		let rc=$res
@@ -118,8 +118,8 @@ infoln "Generating channel create transaction '${CHANNEL_NAME}.tx'"
 createChannelTx
 
 ## Create anchorpeertx
-infoln "Generating anchor peer update transactions"
-createAncorPeerTx
+# infoln "Generating anchor peer update transactions"
+# createAncorPeerTx
 
 FABRIC_CFG_PATH=$PWD/../config/
 
@@ -130,14 +130,14 @@ createChannel
 ## Join all the peers to the channel
 infoln "Join Org1 peers to the channel..."
 joinChannel 1
-infoln "Join Org2 peers to the channel..."
-joinChannel 2
+# infoln "Join Org2 peers to the channel..."
+# joinChannel 2
 
 ## Set the anchor peers for each org in the channel
-infoln "Updating anchor peers for org1..."
-updateAnchorPeers 1
-infoln "Updating anchor peers for org2..."
-updateAnchorPeers 2
+# infoln "Updating anchor peers for org1..."
+# updateAnchorPeers 1
+# infoln "Updating anchor peers for org2..."
+# updateAnchorPeers 2
 
 successln "Channel successfully joined"
 
